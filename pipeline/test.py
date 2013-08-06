@@ -24,6 +24,12 @@ class TestPipeline(unittest.TestCase):
         def consumer(num):
             self.trace.append(("consumer", num))
 
+        def validate(num):
+            if num >= 0:
+                return True
+            return False
+
+        self.validate = validate
         self.provider = provider
         self.stage1 = stage1
         self.stage2 = stage2
@@ -31,7 +37,7 @@ class TestPipeline(unittest.TestCase):
         self.trace = []
 
     def test_pipeline(self):
-        p = Pipeline(self.provider, [self.stage1, self.stage2], self.consumer)
+        p = Pipeline(self.provider, [self.stage1, self.stage2], self.consumer, self.validate)
         p.follow(0)
         desired_trace = [
         ("provider", 0), ("stage1", 0), ("stage2", 0), ("consumer", 0),
@@ -46,9 +52,9 @@ class TestPipeline(unittest.TestCase):
 class TestBranchedPipeline(TestPipeline):
 
     def test_pipeline(self):
-        p1 = TailPipeline([self.stage1, self.stage2], self.consumer)
-        p2 = TailPipeline([self.stage1, self.stage2], self.consumer)
-        p = BranchedPipeline(self.provider, [self.stage1, self.stage2], [p1, p2])
+        p1 = TailPipeline([self.stage1, self.stage2], self.consumer, self.validate)
+        p2 = TailPipeline([self.stage1, self.stage2], self.consumer, self.validate)
+        p = BranchedPipeline(self.provider, [self.stage1, self.stage2], [p1, p2], self.validate)
 
         p.follow(0)
         desired_trace = [
@@ -74,9 +80,9 @@ class TestBranchedPipeline(TestPipeline):
 class TestExtentionPipeline(TestPipeline):
 
     def test_pipeline(self):
-        p1 = ExtentionPipeline([self.stage1, self.stage2])
-        p2 = TailPipeline([], self.consumer)
-        p = BranchedPipeline(self.provider, [], [p1, p2])
+        p1 = ExtentionPipeline([self.stage1, self.stage2], self.validate)
+        p2 = TailPipeline([], self.consumer, self.validate)
+        p = BranchedPipeline(self.provider, [], [p1, p2], self.validate)
 
         p.follow(0)
         desired_trace = [

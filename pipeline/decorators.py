@@ -10,7 +10,7 @@ def coroutine(func):
 
 
 @coroutine
-def Producer(func, next_stage):
+def Producer(func, next_stage, validate):
     '''Producer: only .send (and yield as entry point).'''
 
     state = (yield)  # get initial state
@@ -20,17 +20,20 @@ def Producer(func, next_stage):
                 res, state = func(state)
             except StopPipeline:
                 return
-            next_stage.send(res)
+            if validate(res):
+                next_stage.send(res)
 
 
 @coroutine
-def stage(func, next_stage):
+def stage(func, next_stage, validate):
     '''Stage: both (yield) and .send.'''
 
     with close_on_exit(next_stage):
         while True:
             data = (yield)
-            next_stage.send(func(data))
+            data = func(data)
+            if validate(data):
+                next_stage.send(data)
 
 
 @coroutine
