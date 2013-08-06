@@ -14,7 +14,7 @@ Some improvements after: http://www.dabeaz.com/Fcoroutines/Coroutines.pdf
 # TODO: add cycle pipe
 
 
-from decorators import consumer, stage, Producer, broadcast
+from decorators import consumer, stage, Producer
 from utils import validate
 
 
@@ -31,41 +31,10 @@ class Pipeline(object):
         self._pipeline = Producer(producer_func, self._pipeline, self._validator)
 
     def follow(self, initial_state):
+        res = []
         try:
-            self._pipeline.send(initial_state)
+            while True:
+                res.append(self._pipeline.send(initial_state))
         except StopIteration:
             self._pipeline.close()
-
-
-class BranchedPipeline(Pipeline):
-
-    def __init__(self, producer_func, stages, branches, validator=validate):
-        '''constructs the pipeline'''
-        self._validator = validator
-        self._pipeline = broadcast(branches)
-
-        while stages:
-            self._pipeline = stage(stages.pop(), self._pipeline, self._validator)
-
-        self._pipeline = Producer(producer_func, self._pipeline, self._validator)
-
-
-class TailPipeline(Pipeline):
-
-    def __init__(self, stages, consumer_func, validator=validate):
-        '''constructs the pipeline'''
-        self._validator = validator
-        self._pipeline = consumer(consumer_func)
-
-        while stages:
-            self._pipeline = stage(stages.pop(), self._pipeline, self._validator)
-
-
-class ExtentionPipeline(Pipeline):
-
-    def __init__(self, stages, validator=validate):
-        '''constructs the pipeline'''
-        self._validator = validator
-        self._pipeline = consumer(lambda x: x)
-        while stages:
-            self._pipeline = stage(stages.pop(), self._pipeline, self._validator)
+            return res

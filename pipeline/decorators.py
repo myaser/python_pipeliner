@@ -21,19 +21,20 @@ def Producer(func, next_stage, validate):
             except StopPipeline:
                 return
             if validate(res):
-                next_stage.send(res)
+                yield next_stage.send(res)
 
 
 @coroutine
 def stage(func, next_stage, validate):
     '''Stage: both (yield) and .send.'''
 
+    data = None
     with close_on_exit(next_stage):
         while True:
-            data = (yield)
+            data = (yield data)
             data = func(data)
             if validate(data):
-                next_stage.send(data)
+                data = next_stage.send(data)
 
 
 @coroutine
@@ -50,7 +51,9 @@ def broadcast(pipelines):
 def consumer(func):
     '''Consumer: only (yield).'''
 
+    data = None
+
     # nothing to "close" here
     while True:
-        data = (yield)
-        func(data)
+        data = (yield data)
+        data = func(data)
