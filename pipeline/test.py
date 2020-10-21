@@ -1,6 +1,6 @@
 import unittest
-from __init__ import Pipeline
-from utils import StopPipeline
+from . import Pipeline
+from .utils import StopPipeline
 
 
 class TestPipeline(unittest.TestCase):

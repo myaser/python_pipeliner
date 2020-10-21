@@ -1,10 +1,10 @@
-from utils import close_on_exit, StopPipeline
+from .utils import close_on_exit, StopPipeline
 
 
 def coroutine(func):
     def start(*args, **kwargs):
         coroutine = func(*args, **kwargs)
-        coroutine.next()
+        next(coroutine)
         return coroutine
     return start
 

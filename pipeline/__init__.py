@@ -14,8 +14,8 @@ Some improvements after: http://www.dabeaz.com/Fcoroutines/Coroutines.pdf
 # TODO: add cycle pipe
 
 
-from decorators import consumer, stage, Producer
-from utils import validate
+from .decorators import consumer, stage, Producer
+from .utils import validate
 
 
 class Pipeline(object):

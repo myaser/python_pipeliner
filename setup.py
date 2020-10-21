@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name="python_pipeliner",
-    version="0.5",
+    version="0.5.1",
     author="Mahmoud Yaser",
     author_email="me.MahmoudYaser@gmail.com",
     description=("utility package to implement pipeline architectural pattern"),
